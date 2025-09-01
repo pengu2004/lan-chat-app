@@ -50,7 +50,7 @@ def cleaner(peerlist,peer_lock):
         to_remove=[]
         for address,info in peerlist.items():
             last_seen=info["time_stamp"]
-            if current_time-last_seen>=WAIT_TIME:
+            if current_time-last_seen>=WAIT_TIME: 
                 to_remove.append(address)
                 print("Removed",info["name"]) #removal message
         for addr in to_remove:
@@ -66,10 +66,12 @@ if __name__== "__main__":
     im_alive_thread = threading.Thread(target=im_alive,args=(peerlist,name))
     are_you_there_thread = threading.Thread(target=are_you_there, args=(peerlist,peer_lock))
     cleaner_thread=threading.Thread(target=cleaner,args=(peerlist,peer_lock))
+
     im_alive_thread.start()
     are_you_there_thread.start()
     cleaner_thread.start()
     
+
             
 
 

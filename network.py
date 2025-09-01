@@ -7,6 +7,8 @@ BROADCAST_INTERVAL = 3
 BROADCAST_MESSAGE=b'DISCOVERY'
 WAIT_TIME=10
 peerlist={}
+peer_lock = threading.Lock()
+
 def create_socket():
     sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM) #DGRAM refers to udp
     sock.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1) #Letting the socket make brodcasts
@@ -24,34 +26,35 @@ def im_alive(peerlist,my_name): #use to broadcast that  I am alive
         print("Broadcaster is online")
         time.sleep(BROADCAST_INTERVAL)
         
-def are_you_there(peerlist): 
+def are_you_there(peerlist,peer_lock): 
     listner=create_socket()
-    listner.bind(("",BROADCAST_PORT))
+    listner.bind(("",BROADCAST_PORT))#listening to the broadcast port 
     while True:
+
         try:
-            data,addr=listner.recvfrom(1024)
-            if data.startswith(BROADCAST_MESSAGE) and addr not in peerlist:
-                print("Peer found",addr)
-                data=data.split(BROADCAST_MESSAGE)
-                peerlist[addr]=[data[1].decode('utf-8'),time.time()] #decoding the message to add the nickname
-                print(peerlist)
-            elif addr in peerlist:
-                peerlist[addr][1]=time.time()# updating the time
+            with peer_lock:
+                data,addr=listner.recvfrom(1024)
+                if data.startswith(BROADCAST_MESSAGE) and addr not in peerlist and name not in data.decode():
+                    print("Peer found",addr)
+                    data=data.split(BROADCAST_MESSAGE)
+                    peerlist[addr]={"name":data[1].decode('utf-8'),"time_stamp":time.time()} #decoding the message to add the nickname
+                    print(peerlist)
+                elif addr in peerlist:
+                    peerlist[addr]["time_stamp"]=time.time()# updating the time
         except socket.timeout:
             print("Listening..")
-            cleaner(peerlist)
 
-def cleaner(peerlist):
-    current_time=time.time()
-    to_remove=[]
-    for address,info in peerlist.items():
-        last_seen=info[1]
-        if current_time-last_seen>=WAIT_TIME:
-            to_remove.append(address)
-            print("Removed",info[0]) #removal message
-    for addr in to_remove:
-        
-        peerlist.pop(addr)
+def cleaner(peerlist,peer_lock):
+    with peer_lock:
+        current_time=time.time()
+        to_remove=[]
+        for address,info in peerlist.items():
+            last_seen=info["time_stamp"]
+            if current_time-last_seen>=WAIT_TIME:
+                to_remove.append(address)
+                print("Removed",info["name"]) #removal message
+        for addr in to_remove:
+            peerlist.pop(addr)
 
 
 
@@ -61,9 +64,11 @@ def cleaner(peerlist):
 if __name__== "__main__":
     name=input("Enter your name")
     im_alive_thread = threading.Thread(target=im_alive,args=(peerlist,name))
-    are_you_there_thread = threading.Thread(target=are_you_there, args=(peerlist,))
+    are_you_there_thread = threading.Thread(target=are_you_there, args=(peerlist,peer_lock))
+    cleaner_thread=threading.Thread(target=cleaner,args=(peerlist,peer_lock))
     im_alive_thread.start()
     are_you_there_thread.start()
+    cleaner_thread.start()
     
             
 

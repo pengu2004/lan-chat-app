@@ -1,33 +1,35 @@
 import socket
 import threading
-name=str(input("Enter your name"))
-peers=[]
-def discovery():
-        udp_socket=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        udp_socket.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1)
+import time
 
-        message=b'Any peers'
-        udp_socket.sendto(message,('<brodcast>',6000))
-        udp_socket.settimeout(2)
-        while True:
-                try:
-                    data,addr=udp_socket.recvfrom(1024)
-                    peers.append(addr)
-                    print("A new peer was added")
-                    print(data)
-                except TimeoutError:
-                       print("No peer found retrying...")
-def listener():
-    udp_socket=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-    udp_socket.bind(('',6000))
+BROADCAST_PORT = 6000
+DISCOVERY_MSG = b"DISCOVERY_REQUEST"
+peer=[]
+
+def send_broadcast():
+    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
     while True:
-                data,addr=udp_socket.recvfrom(1024)
-                if data==b'Any peers':
-                    print("Discovery request from",addr)
-                    udp_socket.sendto(b"Hello I am Peer", addr)
-                       
+        udp_socket.sendto(DISCOVERY_MSG, ('<broadcast>', BROADCAST_PORT))
+        print("Broadcast sent")
+        time.sleep(5)  # send every 5 seconds
+
+def listen_for_peers():
+    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_socket.bind(("", BROADCAST_PORT))
+
+    while True:
+        data, addr = udp_socket.recvfrom(1024)
+        if data == DISCOVERY_MSG:
+            print(f"Discovery request from {addr}")
+            # send back a response
+            udp_socket.sendto(b"DISCOVERY_RESPONSE", addr)
+        elif data == b"DISCOVERY_RESPONSE":
+            peer.append(addr)
+            print(f"Peer found: {addr}")
+            print(peer)
+
 if __name__ == "__main__":
-    threading.Thread(target=listener, daemon=True).start()
-    discovery()
-
-
+    threading.Thread(target=send_broadcast, daemon=True).start()
+    listen_for_peers()

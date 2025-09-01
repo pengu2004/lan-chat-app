@@ -1,6 +1,8 @@
 import socket
 import threading
 import time
+from rich.console import Console
+console=Console()
 
 BROADCAST_PORT = 50000
 BROADCAST_INTERVAL = 3
@@ -45,16 +47,18 @@ def are_you_there(peerlist,peer_lock):
             print("Listening..")
 
 def cleaner(peerlist,peer_lock):
-    with peer_lock:
-        current_time=time.time()
-        to_remove=[]
-        for address,info in peerlist.items():
-            last_seen=info["time_stamp"]
-            if current_time-last_seen>=WAIT_TIME: 
-                to_remove.append(address)
-                print("Removed",info["name"]) #removal message
-        for addr in to_remove:
-            peerlist.pop(addr)
+    while True:
+        with peer_lock:
+            current_time=time.time()
+            to_remove=[]
+            for address,info in peerlist.items():
+                last_seen=info["time_stamp"]
+                if current_time-last_seen>=WAIT_TIME: 
+                    to_remove.append(address)
+                    print("Removed",info["name"]) #removal message
+            for addr in to_remove:
+                peerlist.pop(addr)
+
 
 
 
@@ -62,6 +66,7 @@ def cleaner(peerlist,peer_lock):
 
 
 if __name__== "__main__":
+    console.print("Hii Welcome",style="bold red")
     name=input("Enter your name")
     im_alive_thread = threading.Thread(target=im_alive,args=(peerlist,name))
     are_you_there_thread = threading.Thread(target=are_you_there, args=(peerlist,peer_lock))
@@ -71,8 +76,8 @@ if __name__== "__main__":
     are_you_there_thread.start()
     cleaner_thread.start()
     
+#todo use rich.Live to make a peer table
 
-            
 
 
 

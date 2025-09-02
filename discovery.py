@@ -38,7 +38,7 @@ def cleaner(peerlist,peer_lock):
     while True:
         with peer_lock:
             current_time=time.time()
-            to_remove=[]
+            to_remove=[] #adding the items to remove
             for address,info in peerlist.items():
                 last_seen=info["time_stamp"]
                 if current_time-last_seen>=WAIT_TIME: 

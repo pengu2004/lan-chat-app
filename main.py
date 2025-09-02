@@ -4,7 +4,7 @@ import time
 from rich.console import Console
 from rich.live import Live
 from rich.layout import Layout
-from display_mod import generate_table,display_name
+from display_mod import generate_table,display_name,chat_box
 from discovery import im_alive,are_you_there,cleaner
 
 
@@ -45,7 +45,7 @@ if __name__== "__main__":
         while True:
             layout["left"].update(generate_table(peerlist))
             layout["right_header"].update(display_name(name))
-            
+            layout["right_body"].update(chat_box(peerlist))
             
             live.update(layout)
             time.sleep(0.4)

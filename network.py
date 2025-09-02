@@ -1,4 +1,6 @@
 import socket
+import threading
+
 
 def create_socket():
     sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM) #DGRAM refers to udp
@@ -7,3 +9,5 @@ def create_socket():
     sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEPORT,1)
     sock.settimeout(2) #wait for 2 seconds and if nothig happens then ->timeout
     return sock
+
+

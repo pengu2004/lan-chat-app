@@ -6,7 +6,6 @@ from rich.live import Live
 from rich.layout import Layout
 from display_mod import generate_table,display_name,chat_box
 from discovery import im_alive,are_you_there,cleaner
-from network import create_discovery_socket
 
 
 console=Console()

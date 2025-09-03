@@ -6,6 +6,7 @@ from rich.prompt import Prompt
 import time
 import queue
 import threading
+from network import connect_to_server
 input_queue=queue.Queue()
 messages = []       # store chat history
 current_peer = None # store selected peer name
@@ -13,12 +14,12 @@ current_peer = None # store selected peer name
 console=Console()
 
 def generate_table(peerlist):
-    table = Table(title="Peerlist")
+    table = Table(title="Peerlist",border_style="green")
     table.add_column("IP address")
     table.add_column("Nickname")
     table.add_column("Ping")
     for (ip, port), info in peerlist.items():
-        table.add_row(f"{ip}:{port}", info["name"], str(round(time.time() - info["time_stamp"], 2)))
+        table.add_row(f"[red]{ip}:{port}[red]", info["name"], str(round(time.time() - info["time_stamp"], 2)))
     return table
 def display_name(my_name):
     status_text =Text(f"• {my_name}", style="bold green")
@@ -33,26 +34,41 @@ def get_input():
         input_queue.put(inp)
 
 threading.Thread(target=get_input, daemon=True).start()# allow non blocking user input
-
 def chat_box(peerlist):
-    global current_peer #can chat to only 1 peer for now
-    if current_peer:
-            return Panel(f"You are chatting with {current_peer}", title=current_peer, border_style="blue")
+    global current_peer
+    global messages
 
-    while not input_queue.empty():
-        inp=input_queue.get()
+   
+    if not input_queue.empty():
+        inp = input_queue.get()
+        
+       
         if current_peer is None:
+            peer_found = False
             for (ip, port), info in peerlist.items():
-                if inp==info["name"]:
-                    current_peer=inp
-                    return Panel(f"You are now chatting with {current_peer}", title=current_peer, border_style="blue")
-            error_text = Text(f"{inp} is not online or nickname is incorrect.", style="red")
-            return Panel(error_text)
-    prompt_text = Text("Enter the nickname of the person you want to chat with")
-    return Panel(prompt_text, title="Chat")
+                if inp == info["name"]:
+                    current_peer = inp
+                    peer_found = True
+                    current_peer_info = info
+                    break
+            
+            if not peer_found:
+                error_text = Text(f"{inp} is not online or nickname is incorrect.", style="red")
+                return Panel(error_text, title="Error")
 
+        else:
+            messages.append(f"[bold red]You:[/bold red] {inp}")
 
-    
+        
+            console.log(f"Sending message to {current_peer}: {inp}")
+            
+    if current_peer:
+        chat_history = Text("\n".join(messages))
+        chat_history_panel = Panel(chat_history, title=f"Chatting with {current_peer}", border_style="blue")
+        
+        
+        return chat_history_panel
+    else:
+        prompt_text = Text("Enter the nickname of the person you want to chat with")
+        return Panel(prompt_text, title="Chat")
 
-
-    

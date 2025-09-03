@@ -6,7 +6,7 @@ from rich.live import Live
 from rich.layout import Layout
 from display_mod import generate_table,display_name,chat_box
 from discovery import im_alive,are_you_there,cleaner
-
+from network import create_discovery_socket
 
 
 console=Console()
@@ -37,9 +37,14 @@ if __name__== "__main__":
         Layout(name="right", ratio=3)
     )
     layout["right"].split_column(
-        Layout(name="right_header", size=3), # A small top section for your name
-        Layout(name="right_body")            # The main body for chat/input
+        Layout(name="right_header", size=3), # A small top section for  name
+        Layout(name="right_body")            
     )
+    server_thread = threading.Thread(target=create_discovery_socket, args=(50000,))
+    server_thread.daemon = True 
+    server_thread.start()
+
+    time.sleep(1) # Give the server a moment to start
 
     with Live(layout, refresh_per_second=4) as live:
         while True:

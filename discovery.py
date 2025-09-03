@@ -2,13 +2,13 @@ import socket
 import time
 from rich.console import Console
 from configs import BROADCAST_INTERVAL,BROADCAST_MESSAGE,BROADCAST_PORT,WAIT_TIME
-from network import create_socket
+from network import create_discovery_socket
 console=Console()
 
 
 
 def im_alive(peerlist,my_name): #use to broadcast that  I am alive
-    broadcaster=create_socket()
+    broadcaster=create_discovery_socket()
     while True:
         nick_name=my_name.encode("utf-8")
         broadcaster.sendto(BROADCAST_MESSAGE+nick_name,('255.255.255.255',BROADCAST_PORT))
@@ -17,7 +17,7 @@ def im_alive(peerlist,my_name): #use to broadcast that  I am alive
         time.sleep(BROADCAST_INTERVAL)
         
 def are_you_there(peerlist,peer_lock,my_name): 
-    listner=create_socket()
+    listner=create_discovery_socket()
     listner.bind(("",BROADCAST_PORT))#listening to the broadcast port 
     while True:
 

@@ -38,8 +38,10 @@ def create_client(ip,port=7777):# this happens when a user has chosen a correct 
     try:
         peer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         peer_socket.connect((ip, port))
+        peer_socket.settimeout(2)
         threading.Thread(target=receive_message, args=(peer_socket,), daemon=True).start()
         return peer_socket
     except Exception as e:
         print("There was an error",e)
+
 

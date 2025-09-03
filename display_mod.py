@@ -6,35 +6,43 @@ from rich.prompt import Prompt
 import time
 import queue
 import threading
-from network import create_discovery_socket,create_client
-input_queue=queue.Queue()
+from network import create_discovery_socket, create_client
 
-messages = []       # store chat history
-current_peer = None # store selected peer name
-peer_socket = None
-console=Console()
+input_queue = queue.Queue()
+messages = []        # store chat history
+current_peer = None  # store selected peer name
+peer_socket = {}     # FIXED: use a dict
+console = Console()
 
 def generate_table(peerlist):
-    table = Table(title="Peerlist",border_style="green")
+    table = Table(title="Peerlist", border_style="green")
     table.add_column("IP address")
     table.add_column("Nickname")
     table.add_column("Ping")
     for (ip, port), info in peerlist.items():
         table.add_row(f"[red]{ip}:{port}[red]", info["name"], str(round(time.time() - info["time_stamp"], 2)))
     return table
+
 def display_name(my_name):
-    status_text =Text(f"• {my_name}", style="bold green")
-    
-    name_panel =Panel(status_text, title="You", border_style="green")
-    return name_panel
+    status_text = Text(f"• {my_name}", style="bold green")
+    return Panel(status_text, title="You", border_style="green")
 
 def get_input():
     while True:
-        time.sleep(1)
-        inp=input("<<<")
+        inp = input("<<< ")
         input_queue.put(inp)
 
-threading.Thread(target=get_input, daemon=True).start()# allow non blocking user input
+threading.Thread(target=get_input, daemon=True).start()  # allow non-blocking user input
+
+def connect_to_peer(ip, port, peer_name):
+    """Run client connection in a separate thread to avoid blocking"""
+    s = create_client(ip, port)
+    if s:
+        peer_socket[peer_name] = s
+        console.print(f"[green]Successfully connected to {peer_name}[/green]")
+    else:
+        console.print(f"[red]Failed to connect to {peer_name}[/red]")
+
 def chat_box(peerlist):
     global current_peer, messages, peer_socket
 
@@ -46,15 +54,10 @@ def chat_box(peerlist):
             peer_found = False
             for (ip, port), info in peerlist.items():
                 if inp == info["name"]:
-                    s = create_client(ip, port)
-                    if s:
-                        current_peer = inp
-                        peer_socket[current_peer] = s
-                        return Panel("Successfully connected", title="Connected")
-                    else:
-                        return Panel("Failed to connect to peer.", title="Error")
+                    # Start client connection in a thread to avoid blocking
+                    threading.Thread(target=connect_to_peer, args=(ip, port, inp), daemon=True).start()
                     peer_found = True
-                    break
+                    return Panel("Connecting...", title="Info")
             if not peer_found:
                 return Panel(Text(f"{inp} is not online or nickname is incorrect.", style="red"), title="Error")
 

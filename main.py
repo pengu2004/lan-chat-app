@@ -40,10 +40,6 @@ if __name__== "__main__":
         Layout(name="right_header", size=3), # A small top section for  name
         Layout(name="right_body")            
     )
-    server_thread = threading.Thread(target=create_discovery_socket, args=(50000,))
-    server_thread.daemon = True 
-    server_thread.start()
-
     time.sleep(1) # Give the server a moment to start
 
     with Live(layout, refresh_per_second=4) as live:

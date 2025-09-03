@@ -6,7 +6,7 @@ from rich.prompt import Prompt
 import time
 import queue
 import threading
-from network import connect_to_server
+from network import create_discovery_socket
 input_queue=queue.Queue()
 messages = []       # store chat history
 current_peer = None # store selected peer name

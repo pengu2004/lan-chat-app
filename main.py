@@ -7,6 +7,8 @@ from rich.layout import Layout
 from display_mod import generate_table,display_name,chat_box
 from discovery import im_alive,are_you_there,cleaner
 
+from network import create_server
+
 
 console=Console()
 
@@ -23,10 +25,11 @@ if __name__== "__main__":
     im_alive_thread = threading.Thread(target=im_alive,args=(peerlist,name))
     are_you_there_thread = threading.Thread(target=are_you_there, args=(peerlist,peer_lock,name))
     cleaner_thread=threading.Thread(target=cleaner,args=(peerlist,peer_lock))
-
+    server=threading.Thread(target=create_server)
     im_alive_thread.start()
     are_you_there_thread.start()
     cleaner_thread.start()
+    server.start()
 
     #main part of  display 
     #dividing the screen into 2 parts

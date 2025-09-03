@@ -6,11 +6,12 @@ from rich.prompt import Prompt
 import time
 import queue
 import threading
-from network import create_discovery_socket
+from network import create_discovery_socket,create_client
 input_queue=queue.Queue()
+
 messages = []       # store chat history
 current_peer = None # store selected peer name
-
+peer_socket = None
 console=Console()
 
 def generate_table(peerlist):
@@ -47,9 +48,12 @@ def chat_box(peerlist):
             peer_found = False
             for (ip, port), info in peerlist.items():
                 if inp == info["name"]:
+
                     current_peer = inp
                     peer_found = True
-                    current_peer_info = info
+                    s=create_client(ip,port)
+                    peer_socket[current_peer]=s
+                    return Panel("Successfully connected", title="Connected")
                     break
             
             if not peer_found:
@@ -58,13 +62,12 @@ def chat_box(peerlist):
 
         else:
             messages.append(f"[bold red]You:[/bold red] {inp}")
-
-        
-            console.log(f"Sending message to {current_peer}: {inp}")
             
     if current_peer:
         chat_history = Text("\n".join(messages))
         chat_history_panel = Panel(chat_history, title=f"Chatting with {current_peer}", border_style="blue")
+        #send and receive messages
+
         
         
         return chat_history_panel

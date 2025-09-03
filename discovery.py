@@ -24,6 +24,7 @@ def are_you_there(peerlist,peer_lock,my_name):
         try:
             with peer_lock:
                 data,addr=listner.recvfrom(1024)
+                print(data)
                 if data.startswith(BROADCAST_MESSAGE) and addr not in peerlist and my_name not in data.decode():
                     print("Peer found",addr)
                     data=data.split(BROADCAST_MESSAGE)

@@ -49,7 +49,10 @@ def chat_box(peerlist):
             for (ip, port), info in peerlist.items():
                 if inp == info["name"]:
                         current_peer=info["name"]
-                        s=create_client(ip,port)
+                        ip_address = ip[0]  
+                        port_number = int(ip[1])
+
+                        s=create_client(ip_address,port_number)
                         peer_socket=s
                         return Panel("Successfully connected", title="Connected")
                    

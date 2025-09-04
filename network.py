@@ -35,6 +35,7 @@ def create_client(ip, port):
         
     client.connect((ip, port))
     print(f"Client connected to {ip}:{port}")
+    
     thread = threading.Thread(target=recieve_message, args=(client, "Server"), daemon=True)
     thread.start()
     return client

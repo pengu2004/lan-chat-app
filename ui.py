@@ -62,7 +62,7 @@ class ChatUI:
                 except Exception as e:
                     self.session.add_message(f"[red]Failed to send: {e}[/red]")
          if self.session.current_peer:
-            chat_history = Text.from_markup("\n".join(self.session.messages))
+            chat_history = Text.from_markup("\n".join(self.session.messages[:10]))#show only the last 10 messages
             return Panel(chat_history, title=f"Chatting with {self.session.current_peer}", border_style="blue")
          else:
             return Panel(Text("Enter the nickname of the person you want to chat with"), title="Chat")

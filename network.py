@@ -22,11 +22,12 @@ def create_server():
     while True:
         conn, addr = server.accept()
         print(f"Server: You are connected to {addr[0]} at port {addr[1]}")
-        message = conn.recv(1024)
-        print(message.decode())
         thread = threading.Thread(target=recieve_message, args=(conn, f"Client {addr[1]}"), daemon=True)
         thread.start()
 
+        message = conn.recv(1024)
+        print(message.decode())
+       
 def create_client(ip, port):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print(ip, port)
@@ -36,11 +37,12 @@ def create_client(ip, port):
     print(f"Client connected to {ip}:{port}")
     thread = threading.Thread(target=recieve_message, args=(client, "Server"), daemon=True)
     thread.start()
+    return client
 
 
 def recieve_message(sock, name):
     import display_mod
-    while True:
+    while True: 
         try:
             data = sock.recv(1024)
             if not data:

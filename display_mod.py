@@ -52,9 +52,11 @@ def chat_box(peerlist):
                         ip_address = ip  
                         port_number = port
 
-                        s=create_client(ip_address,port_number)
+                        s=create_client(ip_address,7777)
+                        
                         peer_socket=s
-                        return Panel("Successfully connected", title="Connected")
+
+                        return Panel(f"Successfully connected{peer_socket}", title="Connected")
                    
             if not peer_found:
                 return Panel(Text(f"{inp} is not online or nickname is incorrect.", style="red"), title="Error")

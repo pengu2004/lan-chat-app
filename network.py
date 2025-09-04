@@ -43,7 +43,7 @@ def create_client(ip, port):
 
 
 def recieve_message(sock, name):
-    import display_mod
+    import ui
     while True: 
         try:
             data = sock.recv(1024)
@@ -51,9 +51,9 @@ def recieve_message(sock, name):
                 print(f"Connection from {name} closed.")
                 break
             # Append message to the list in the display module
-            display_mod.messages.append(f"[bold red]{name}: {data.decode()}")
+            ui.messages.append(f"[bold red]{name}: {data.decode()}")
             print(f"Message received from {name}")
-            print(display_mod.messages)
+            print(ui.messages)
         except (socket.error, ConnectionResetError) as e:
             print(f"Connection error with {name}: {e}")
             break

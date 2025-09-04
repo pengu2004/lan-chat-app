@@ -4,7 +4,7 @@ import time
 from rich.console import Console
 from rich.live import Live
 from rich.layout import Layout
-from display_mod import generate_table,display_name,chat_box
+from ui import generate_table,display_name,chat_box
 from discovery import im_alive,are_you_there,cleaner
 
 

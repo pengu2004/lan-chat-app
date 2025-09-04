@@ -30,7 +30,7 @@ class PeerDiscovery:
         while not self.stop_event.is_set():
             try:
                 broadcaster.sendto(BROADCAST_MESSAGE+nick_name,('255.255.255.255',BROADCAST_PORT))
-                self.console.print(f"[green]Broadcaster is online[/green]{self.my_name}")
+                self.console.print(f"[green]Broadcaster is online[/green] {self.my_name}")
             except Exception as e:
                 self.console.print(f"[red]Broadcast error: {e}[/red]")
 

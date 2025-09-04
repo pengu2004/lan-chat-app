@@ -4,6 +4,7 @@ from ui import ChatUI
 from chat_session import ChatSession
 from rich.live import Live
 from rich.console import Group
+from network import start_server
 
 def main():
     print("Starting LAN Chat App...")
@@ -18,6 +19,8 @@ def main():
 
     # Share peerlist with session for UI access
     chat_session.peerlist = discovery.peerlist
+    start_server(chat_session.peerlist)
+
 
     # Create UI instance
     chat_ui = ChatUI(chat_session)

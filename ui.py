@@ -50,19 +50,20 @@ class ChatUI:
                     if inp==info["name"]:
                         self.session.current_peer=inp
                         self.session.peer_found=True
-                        print(ip,port)
+                        self.console.print(ip,port)
                         self.session.peer_socket = create_client(ip, port)
                         break
                 if not self.session.peer_found:
                     return Panel(Text(f"{inp} is not online or nickname is incorrect.", style="red"), title="Error")
             else:
-                self.session.add_message(f"[red]Failed to send: {e}[/red]")
+                self.session.add_message(f"[red]You: {inp}[/red]")
                 try:
                     self.session.peer_socket.send(inp.encode())
                 except Exception as e:
                     self.session.add_message(f"[red]Failed to send: {e}[/red]")
          if self.session.current_peer:
             chat_history = Text.from_markup("\n".join(self.session.messages[:10]))#show only the last 10 messages
+            
             return Panel(chat_history, title=f"Chatting with {self.session.current_peer}", border_style="blue")
          else:
             return Panel(Text("Enter the nickname of the person you want to chat with"), title="Chat")

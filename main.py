@@ -1,66 +1,47 @@
-import socket
-import threading
 import time
-from rich.console import Console
+from discovery import PeerDiscovery
+from ui import ChatUI
+from chat_session import ChatSession
 from rich.live import Live
-from rich.layout import Layout
-from ui import generate_table,display_name,chat_box
-from discovery import im_alive,are_you_there,cleaner
+from rich.console import Group
 
+def main():
+    print("Starting LAN Chat App...")
 
-from network import create_server
+    # Get user nickname
+    chat_session = ChatSession()
+    chat_session.my_name = input("Enter your nickname: ").strip()
 
+    # Start discovery
+    discovery = PeerDiscovery(chat_session.my_name)
+    discovery.start()
 
-console=Console()
+    # Share peerlist with session for UI access
+    chat_session.peerlist = discovery.peerlist
 
-peerlist={}
-peer_lock = threading.Lock() 
+    # Create UI instance
+    chat_ui = ChatUI(chat_session)
 
-
-
-if __name__== "__main__":
-    console.print("Hii Welcome",style="bold red")
-    name=console.input("What is [i]your[/i] [bold red]name[/]?  ")
-
-
-    im_alive_thread = threading.Thread(target=im_alive,args=(peerlist,name))
-    are_you_there_thread = threading.Thread(target=are_you_there, args=(peerlist,peer_lock,name))
-    cleaner_thread=threading.Thread(target=cleaner,args=(peerlist,peer_lock))
-    server=threading.Thread(target=create_server,args=(peerlist,))
-    im_alive_thread.start()
-    are_you_there_thread.start()
-    cleaner_thread.start()
-    server.start()
-
-    #main part of  display 
-    #dividing the screen into 2 parts
-    layout = Layout(name="root")
-    layout.split_row(
-        Layout(name="left"),
-        Layout(name="right", ratio=3)
-    )
-    layout["right"].split_column(
-        Layout(name="right_header", size=3), # A small top section for  name
-        Layout(name="right_body")            
-    )
-    time.sleep(1) # Give the server a moment to start
-
-    with Live(layout, refresh_per_second=4) as live:
+    # Rich Live for dynamic updates
+    with Live(refresh_per_second=10, screen=True) as live:
         while True:
-            layout["left"].update(generate_table(peerlist))
-            layout["right_header"].update(display_name(name))
-            layout["right_body"].update(chat_box(peerlist))
-            
+            # Generate UI components
+            peerlist_table = chat_ui.generate_table()
+            user_panel = chat_ui.display_name()
+            chat_panel = chat_ui.chat_box()
+
+            # Group components for proper rendering
+            layout = Group(
+                peerlist_table,
+                user_panel,
+                chat_panel
+            )
+
+            # Update the live display
             live.update(layout)
-            time.sleep(0.4)
 
+            # Brief sleep to reduce CPU load
+            time.sleep(0.1)
 
-
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    main()

@@ -4,6 +4,7 @@ class ChatSession:
         self.messages=[]
         self.current_peer=None
         self.peer_socket=None
+        self.my_name = None  
 
     def add_message(self,message):
         self.messages.append(message)

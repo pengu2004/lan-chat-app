@@ -43,6 +43,7 @@ class PeerDiscovery:
         while not self.stop_event.is_set():
             try:
                 data,addr=listener.recvfrom(1024)
+                print(data)
                 received_from_self=self.my_name in data.decode() #to check if revcived from self
                 discovery_message=data.startswith(BROADCAST_MESSAGE)
                 is_new_peer=addr not in self.peerlist
@@ -54,7 +55,7 @@ class PeerDiscovery:
                             self.console.print(f"[blue]Peer found: {nickname} at {addr}[/blue]")
                     else:
                         with self.peer_lock:
-                            self.peerlist[addr]["time_stamp"] = time.time()
+                            self.peerlist[addr]["timestamp"] = time.time()
                             self.console.print(f"[blue]Peer Updated:[/blue]")
             except socket.timeout:
                         self.console.print(f"[blue]Listening{nickname} at {addr}:[/blue]")

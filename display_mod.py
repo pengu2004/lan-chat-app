@@ -20,7 +20,7 @@ def generate_table(peerlist):
     table.add_column("Nickname")
     table.add_column("Ping")
     for (ip, port), info in peerlist.items():
-        table.add_row(f"[red]{ip}:{port}[red]", info["name"], str(round(time.time() - info["time_stamp"], 2)))
+        table.add_row(f"[red]{ip}:{port}[red]", info["name"], str(round(time.time() - info["timestamp"], 2)))
     return table
 def display_name(my_name):
     status_text =Text(f"• {my_name}", style="bold green")

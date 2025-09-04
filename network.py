@@ -31,14 +31,9 @@ def create_client(ip, port):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print(ip, port)
 
-    # Correct way to handle the tuple
-    if isinstance(ip, tuple):
-        ip_address = ip[0]
-    else:
-        ip_address = ip
         
-    client.connect((ip_address, port))
-    print(f"Client connected to {ip_address}:{port}")
+    client.connect((ip, port))
+    print(f"Client connected to {ip}:{port}")
     thread = threading.Thread(target=recieve_message, args=(client, "Server"), daemon=True)
     thread.start()
 

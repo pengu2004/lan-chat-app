@@ -56,11 +56,11 @@ class ChatUI:
                 if not self.session.peer_found:
                     return Panel(Text(f"{inp} is not online or nickname is incorrect.", style="red"), title="Error")
             else:
-                self.session.messages.append(f"[bold red]You:[/bold red] {inp}")
+                self.session.add_message(f"[red]Failed to send: {e}[/red]")
                 try:
                     self.session.peer_socket.send(inp.encode())
                 except Exception as e:
-                    self.session.messages.append(f"[red]Failed to send: {e}[/red]")
+                    self.session.add_message(f"[red]Failed to send: {e}[/red]")
          if self.session.current_peer:
             chat_history = Text.from_markup("\n".join(self.session.messages))
             return Panel(chat_history, title=f"Chatting with {self.session.current_peer}", border_style="blue")

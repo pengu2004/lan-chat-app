@@ -71,7 +71,7 @@ def chat_box(peerlist):
 
     # Display chat history
     if current_peer:
-        chat_history = Text.from_markup("\n".join(messages))
+        chat_history = Text.from_markup("\n".join(messages[-10:]))
         return Panel(chat_history, title=f"Chatting with {current_peer}", border_style="blue")
     else:
         return Panel(Text("Enter the nickname of the person you want to chat with"), title="Chat")

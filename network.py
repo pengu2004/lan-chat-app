@@ -35,7 +35,7 @@ def create_client(ip, port):
         
     client.connect((ip, port))
     print(f"Client connected to {ip}:{port}")
-    
+
     thread = threading.Thread(target=recieve_message, args=(client, "Server"), daemon=True)
     thread.start()
     return client
@@ -50,7 +50,7 @@ def recieve_message(sock, name):
                 print(f"Connection from {name} closed.")
                 break
             # Append message to the list in the display module
-            display_mod.messages.append(f"[bold red]{name}: {data.decode()}")
+            display_mod.messages.append(f"[bold blue]{name}: {data.decode()}")
             print(f"Message received from {name}")
             print(display_mod.messages)
         except (socket.error, ConnectionResetError) as e:

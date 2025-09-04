@@ -13,7 +13,7 @@ def create_discovery_socket():
     sock.settimeout(2)
     return sock
 
-def create_server():
+def create_server(peerlist):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("", 7777))
@@ -22,7 +22,8 @@ def create_server():
     while True:
         conn, addr = server.accept()
         print(f"Server: You are connected to {addr[0]} at port {addr[1]}")
-        thread = threading.Thread(target=recieve_message, args=(conn, f"Client {addr[1]}"), daemon=True)
+        
+        thread = threading.Thread(target=recieve_message, args=(conn, f" {peerlist[addr]["name"]}"), daemon=True)
         thread.start()
 
         message = conn.recv(1024)

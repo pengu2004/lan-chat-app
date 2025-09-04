@@ -26,7 +26,7 @@ if __name__== "__main__":
     im_alive_thread = threading.Thread(target=im_alive,args=(peerlist,name))
     are_you_there_thread = threading.Thread(target=are_you_there, args=(peerlist,peer_lock,name))
     cleaner_thread=threading.Thread(target=cleaner,args=(peerlist,peer_lock))
-    server=threading.Thread(target=create_server)
+    server=threading.Thread(target=create_server,args=(peerlist,))
     im_alive_thread.start()
     are_you_there_thread.start()
     cleaner_thread.start()

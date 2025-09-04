@@ -27,7 +27,7 @@ class PeerDiscovery:
     def _broadcast_alive(self): #use to broadcast that  I am alive (private method)
         broadcaster=create_discovery_socket()
         nick_name=self.my_name.encode("utf-8")
-        while not self.stop_event.set():
+        while not self.stop_event.is_set():
             try:
                 broadcaster.sendto(BROADCAST_MESSAGE+nick_name,('255.255.255.255',BROADCAST_PORT))
                 self.console.print(f"[green]Broadcaster is online[/green]{self.my_name}")

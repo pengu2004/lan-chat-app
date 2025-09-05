@@ -50,7 +50,6 @@ def recieve_message(sock, name):
             if not data:
                 print(f"Connection from {name} closed.")
                 break
-            # Append message to the list in the display module
             display_mod.messages.append(f"[bold red]{name}: {data.decode()}")
             print(f"Message received from {name}")
             print(display_mod.messages)

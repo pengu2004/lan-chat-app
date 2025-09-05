@@ -2,14 +2,17 @@ from rich.table import Table
 from rich.console import Console
 from rich.text import Text
 from rich.panel import Panel
-from rich.prompt import Prompt
 import time
 import queue
 import threading
-from network import create_discovery_socket, create_client
 from configs import Config
 
 console = Console()
+
+# Global variables for the display module (shared with NetworkManager)
+messages = []
+current_peer = None
+peer_socket = None
 
 
 class DisplayManager:
@@ -17,9 +20,6 @@ class DisplayManager:
     
     def __init__(self, network_manager):
         self.network_manager = network_manager
-        self.messages = []
-        self.current_peer = None
-        self.peer_socket = None
         self.input_queue = queue.Queue()
         
         # Start input thread
@@ -60,24 +60,25 @@ class DisplayManager:
     
     def chat_box(self, peerlist):
         """Handle chat box display and message processing"""
+        global current_peer, messages, peer_socket
+        
         if not self.input_queue.empty():
             inp = self.input_queue.get()
             
             # Select a peer
-            if self.current_peer is None:
+            if current_peer is None:
                 peer_found = False
                 for (ip, port), info in peerlist.items():
                     if inp == info["name"]:
-                        self.current_peer = info["name"]
+                        current_peer = info["name"]
                         ip_address = ip
-                        port_number = port
                         
                         # Create client connection using NetworkManager
-                        self.peer_socket = self.network_manager.create_client_connection(
+                        peer_socket = self.network_manager.create_client_connection(
                             ip_address, Config.SERVER_PORT
                         )
                         
-                        return Panel(f"Successfully connected{self.peer_socket}", title="Connected")
+                        return Panel(f"Successfully connected{peer_socket}", title="Connected")
                 
                 if not peer_found:
                     return Panel(
@@ -87,18 +88,18 @@ class DisplayManager:
             
             # Send a message
             else:
-                self.messages.append(f"[bold red] You:[/bold red] {inp}")
+                messages.append(f"[bold red] You:[/bold red] {inp}")
                 try:
-                    self.peer_socket.send(inp.encode())
+                    peer_socket.send(inp.encode())
                 except Exception as e:
-                    self.messages.append(f"[red]Failed to send: {e}[/red]")
+                    messages.append(f"[red]Failed to send: {e}[/red]")
         
         # Display chat history
-        if self.current_peer:
-            chat_history = Text.from_markup("\n".join(self.messages))
+        if current_peer:
+            chat_history = Text.from_markup("\n".join(messages))
             return Panel(
                 chat_history,
-                title=f"Chatting with {self.current_peer}",
+                title=f"Chatting with {current_peer}",
                 border_style="blue"
             )
         else:
@@ -106,47 +107,3 @@ class DisplayManager:
                 Text("Enter the nickname of the person you want to chat with"),
                 title="Chat"
             )
-
-
-# Global variables for backward compatibility (will be removed after full refactoring)
-input_queue = queue.Queue()
-messages = []
-current_peer = None
-peer_socket = None
-
-
-def get_input():
-    """Legacy function - use DisplayManager class instead"""
-    while True:
-        time.sleep(1)
-        inp = input("<<<")
-        input_queue.put(inp)
-
-
-# Start legacy input thread for backward compatibility
-threading.Thread(target=get_input, daemon=True).start()
-
-
-# Legacy functions for backward compatibility
-def generate_table(peerlist):
-    """Legacy function - use DisplayManager class instead"""
-    display = DisplayManager(None)
-    return display.generate_table(peerlist)
-
-
-def display_name(my_name):
-    """Legacy function - use DisplayManager class instead"""
-    display = DisplayManager(None)
-    return display.display_name(my_name)
-
-
-def chat_box(peerlist):
-    """Legacy function - use DisplayManager class instead"""
-    from network import NetworkManager
-    network_manager = NetworkManager(peerlist)
-    display = DisplayManager(network_manager)
-    display.input_queue = input_queue
-    display.messages = messages
-    display.current_peer = current_peer
-    display.peer_socket = peer_socket
-    return display.chat_box(peerlist)

@@ -72,41 +72,17 @@ class NetworkManager:
     
     def _handle_incoming_message(self, sock, name):
         """Handle incoming messages from a connection"""
-        import display_mod
+        # Import here to avoid circular imports
+        from display_mod import messages
         while True:
             try:
                 data = sock.recv(1024)
                 if not data:
                     print(f"Connection from {name} closed.")
                     break
-                display_mod.messages.append(f"[bold red]{name}: {data.decode()}")
+                messages.append(f"[bold red]{name}: {data.decode()}")
                 print(f"Message received from {name}")
-                print(display_mod.messages)
+                print(messages)
             except (socket.error, ConnectionResetError) as e:
                 print(f"Connection error with {name}: {e}")
                 break
-
-
-# Legacy functions for backward compatibility (will be removed after full refactoring)
-def create_discovery_socket():
-    """Legacy function - use NetworkManager class instead"""
-    manager = NetworkManager({})
-    return manager.create_discovery_socket()
-
-
-def create_server(peerlist):
-    """Legacy function - use NetworkManager class instead"""
-    manager = NetworkManager(peerlist)
-    manager._run_server()
-
-
-def create_client(ip, port):
-    """Legacy function - use NetworkManager class instead"""
-    manager = NetworkManager({})
-    return manager.create_client_connection(ip, port)
-
-
-def recieve_message(sock, name):
-    """Legacy function - use NetworkManager class instead"""
-    manager = NetworkManager({})
-    manager._handle_incoming_message(sock, name)

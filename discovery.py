@@ -3,7 +3,7 @@ import time
 import threading
 from rich.console import Console
 from configs import Config
-from network import create_discovery_socket
+from network import NetworkManager
 
 console = Console()
 
@@ -17,6 +17,7 @@ class PeerDiscovery:
         self.peer_lock = threading.Lock()
         self.broadcaster = None
         self.listener = None
+        self.network_manager = NetworkManager(self.peerlist)
         
     def get_peerlist(self):
         """Get a copy of the current peer list"""
@@ -41,7 +42,7 @@ class PeerDiscovery:
     
     def _broadcast_presence(self):
         """Broadcast that this peer is alive"""
-        self.broadcaster = create_discovery_socket()
+        self.broadcaster = self.network_manager.create_discovery_socket()
         while True:
             nick_name = self.my_name.encode("utf-8")
             self.broadcaster.sendto(
@@ -54,7 +55,7 @@ class PeerDiscovery:
     
     def _listen_for_peers(self):
         """Listen for other peers broadcasting their presence"""
-        self.listener = create_discovery_socket()
+        self.listener = self.network_manager.create_discovery_socket()
         self.listener.bind(("", Config.BROADCAST_PORT))
         
         while True:
@@ -94,27 +95,3 @@ class PeerDiscovery:
                 
                 for addr in to_remove:
                     self.peerlist.pop(addr)
-
-
-# Legacy functions for backward compatibility (will be removed after full refactoring)
-def im_alive(peerlist, my_name):
-    """Legacy function - use PeerDiscovery class instead"""
-    discovery = PeerDiscovery(my_name)
-    discovery.peerlist = peerlist
-    discovery._broadcast_presence()
-
-
-def are_you_there(peerlist, peer_lock, my_name):
-    """Legacy function - use PeerDiscovery class instead"""
-    discovery = PeerDiscovery(my_name)
-    discovery.peerlist = peerlist
-    discovery.peer_lock = peer_lock
-    discovery._listen_for_peers()
-
-
-def cleaner(peerlist, peer_lock):
-    """Legacy function - use PeerDiscovery class instead"""
-    discovery = PeerDiscovery("")
-    discovery.peerlist = peerlist
-    discovery.peer_lock = peer_lock
-    discovery._clean_inactive_peers()
